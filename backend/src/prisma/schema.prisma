@@ -1,0 +1,27 @@
+datasource db {
+  provider = "postgresql"  // Use your actual database provider (e.g., mysql, sqlite, etc.)
+  url      = env("DATABASE_URL")  // Ensure this matches the key in your .env file
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Menu {
+  id         Int        @id @default(autoincrement())
+  name       String
+  rootItem   MenuItem?  @relation("RootItemRelation", fields: [rootItemId], references: [id])
+  rootItemId Int?       @unique // Mark rootItemId as unique for one-to-one relation
+  items      MenuItem[] @relation("MenuItemsRelation")
+}
+
+model MenuItem {
+  id        Int        @id @default(autoincrement())
+  name      String
+  parentId  Int?
+  menuId    Int
+  children  MenuItem[] @relation("Children")
+  parent    MenuItem?  @relation("Children", fields: [parentId], references: [id])
+  menu      Menu       @relation("MenuItemsRelation", fields: [menuId], references: [id])
+  rootMenu  Menu?      @relation("RootItemRelation") // Add the reverse relation
+}
